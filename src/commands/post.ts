@@ -1,24 +1,38 @@
 import {
-  AttachmentBuilder,
-  ChatInputCommandInteraction,
+  ActionRowBuilder,
   Client,
-  EmbedBuilder,
+  ModalBuilder,
+  ChatInputCommandInteraction,
   SlashCommandBuilder,
+  TextInputBuilder,
+  TextInputStyle,
 } from "discord.js";
-import path from "path";
-import createPost from "../database/createPost";
 
-const pingGif = path.join(__dirname, "..", "..", "assets", "ping.gif");
+const titleInput = new TextInputBuilder()
+  .setLabel("Title")
+  .setCustomId("postTitle")
+  .setStyle(TextInputStyle.Short)
+  .setRequired(true);
+
+const contentInput = new TextInputBuilder()
+  .setLabel("Content")
+  .setCustomId("postContent")
+  .setStyle(TextInputStyle.Paragraph)
+  .setRequired(true);
+
+const firstActionRow = new ActionRowBuilder().addComponents(titleInput) as any;
+const secondActionRow = new ActionRowBuilder().addComponents(
+  contentInput
+) as any;
+
+const modal = new ModalBuilder()
+  .setTitle("Create Post")
+  .setCustomId("postMessage")
+  .addComponents(firstActionRow, secondActionRow);
 
 const command = new SlashCommandBuilder()
   .setName("post")
-  .setDescription("post a message")
-  .addStringOption((option) =>
-    option
-      .setName("content")
-      .setDescription("the content of the post")
-      .setRequired(true)
-  )
+  .setDescription("Post a message")
   .toJSON();
 
 const handler = async (
@@ -27,15 +41,14 @@ const handler = async (
 ) => {
   if (!client?.user) return;
   try {
-    const authorID = interaction.user.id;
-    const channelID = interaction.channelId;
-    const content = interaction.options.getString("content", true);
-    await createPost(content, authorID, channelID);
-    interaction.reply("Post created :white_check_mark:");
+    await interaction.showModal(modal);
   } catch (error: any) {
     console.log("Error handling ping", error?.message);
     console.error(error);
-    interaction.reply("OOPS! Something went wrong :(");
+    interaction.reply({
+      content: "OOPS! Something went wrong :(",
+      ephemeral: true,
+    });
   }
 };
 

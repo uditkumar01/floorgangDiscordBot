@@ -4,7 +4,7 @@ import handleAllEvents from "./functions/handleAllEvents";
 import envs from "./constants";
 import refreshCommands from "./functions/handleAllCommands";
 
-const { BOT_TOKEN, CLIENT_ID, GUILD_ID } = envs;
+const { BOT_TOKEN } = envs;
 
 const client = new Client({
   intents: [
